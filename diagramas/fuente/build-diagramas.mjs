@@ -351,47 +351,47 @@ function diagramaMigracion() {
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Migración progresiva: el API Gateway envía las rutas ya migradas al SIGEUN 2.0 y el resto al SIGEUN 1.0; la capa legacy-acl traduce los cambios del 1.0 a eventos canónicos y escribe de vuelta solo lo mínimo." xmlns="http://www.w3.org/2000/svg" class="diagram d-mid">${markers(P)}${s}</svg>`;
 }
 
-// ---------- Diagrama 4: despliegue ----------
+// ---------- Diagrama 4: despliegue con los 2 servidores del plan ----------
 function diagramaDespliegue() {
   const P = 'd4';
-  const W = 1180, H = 548;
+  const W = 1180, H = 540;
   let s = '';
   s += `<circle cx="76" cy="60" r="34" class="d-ext"/><text x="76" y="64" text-anchor="middle" class="t-title">Internet</text>`;
   s += box(150, 36, 180, 48, 'Firewall perimetral', 'filtrado y VPN de gestión');
-  s += box(390, 36, 250, 48, 'DMZ · WAF / proxy inverso', '2 VM con IP virtual', 'd-acc');
+  s += box(390, 36, 250, 48, 'Proxy inverso + WAF', 'VM en la DMZ del servidor 1', 'd-acc');
   s += line(P, 110, 60, 149, 60) + line(P, 330, 60, 389, 60);
-  s += line(P, 515, 84, 515, 129);
-  s += `<rect x="40" y="130" width="1100" height="28" rx="5" class="d-bus"/>`;
-  s += `<text x="590" y="149" text-anchor="middle" class="t-bus">Red de servidores · 10/25 GbE · 2 switches redundantes</text>`;
+  s += line(P, 420, 84, 420, 129);
 
-  const nodos = [
-    ['Nodo 1 · Proxmox VE', 'PostgreSQL primaria'],
-    ['Nodo 2 · Proxmox VE', 'PostgreSQL réplica síncrona'],
-    ['Nodo 3 · Proxmox VE', 'PostgreSQL réplica asíncrona'],
-  ];
-  nodos.forEach(([t, pg], i) => {
-    const x = 40 + i * 380;
-    s += line(P, x + 170, 158, x + 170, 185);
-    s += panel(x, 186, 340, 216, t, '');
-    s += box(x + 12, 216, 316, 38, 'VM k8s-prod', 'control plane + worker');
-    s += box(x + 12, 262, 316, 38, 'VM k8s-noprod', 'dev · qa · staging');
-    s += box(x + 12, 308, 316, 38, 'RabbitMQ', 'cola quorum, 1 de 3 réplicas');
-    s += box(x + 12, 354, 316, 38, pg, 'CloudNativePG', 'd-acc');
-  });
-  s += line(P, 368, 373, 431, 373) + lbl(400, 366, 'síncrona');
-  s += path(P, 'M250,392 V420 H970 V393');
-  s += lbl(610, 414, 'réplica asíncrona (WAL)', 'middle');
+  // Servidor 1: producción
+  s += panel(40, 130, 520, 234, 'Servidor 1 · sin GPU · producción', '48 NÚCLEOS · 768 GB · RAID 1');
+  s += box(52, 166, 496, 40, 'k8s-prod · 3 VM', 'microservicios, Keycloak, RabbitMQ', 'd-acc');
+  s += box(52, 214, 496, 40, 'PostgreSQL primaria', 'CloudNativePG', 'd-acc');
+  s += box(52, 262, 496, 40, 'Objetos de producción', 'documentos y adjuntos');
+  s += box(52, 310, 496, 40, 'k8s-staging · 1 VM', 'con cuotas de CPU y RAM');
 
-  s += line(P, 120, 402, 120, 465);
-  s += lbl(128, 446, 'WAL continuo · pgBackRest · Velero', 'start');
-  s += `<g><rect x="40" y="466" width="300" height="56" rx="5" class="d-box"/>` +
-    `<path d="M58,482 v16 a8,3 0 0 0 16,0 v-16" class="d-cyl"/><ellipse cx="66" cy="482" rx="8" ry="3" class="d-cyl"/>` +
-    `<text x="86" y="489" class="t-title">NAS de respaldo</text><text x="86" y="505" class="t-sub">snapshots inmutables · RPO ≤ 15 min</text></g>`;
-  s += box(460, 466, 300, 56, 'Sitio alterno', 'sede Ilo o nube · RTO ≤ 4 h', 'd-ext');
-  s += line(P, 340, 494, 459, 494) + lbl(400, 487, 'copia cifrada diaria');
-  s += box(800, 466, 340, 56, 'Nodo GPU (se compra en R4)', 'se suma al clúster cuando exista el caso de IA', 'd-ext');
-  s += line(P, 1100, 466, 1100, 403, { dash: true });
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Despliegue en tres nodos homogéneos con clústeres Kubernetes de producción y no producción, PostgreSQL con una primaria y dos réplicas, RabbitMQ con tres réplicas, respaldo en NAS y copia cifrada diaria en un sitio alterno." xmlns="http://www.w3.org/2000/svg" class="diagram d-mid">${markers(P)}${s}</svg>`;
+  // Servidor 2: todo lo demás
+  s += panel(620, 130, 520, 390, 'Servidor 2 · con GPU · todo lo demás', '32 NÚCLEOS · 128 GB · 2 GPU');
+  s += box(632, 166, 496, 40, 'Observabilidad', 'Prometheus, Loki, Tempo, Grafana');
+  s += box(632, 214, 496, 88, 'Respaldos', 'WAL de PostgreSQL · Proxmox Backup Server · réplica de objetos');
+  s += box(632, 322, 496, 40, 'PostgreSQL en espera', 'se promueve si falla el servidor 1', 'd-acc');
+  s += box(632, 370, 496, 40, 'k8s-noprod', 'dev y qa');
+  s += box(632, 418, 496, 40, 'Runner de CI + Harbor', 'compilación, pruebas, imágenes');
+  s += box(632, 466, 496, 40, 'VM ia-lab con las 2 GPU', 'OCR de actas e IA, encendida a demanda');
+
+  // Flujos entre servidores
+  s += line(P, 548, 186, 631, 186) + lbl(590, 179, 'telemetría');
+  s += line(P, 548, 234, 631, 234) + lbl(590, 227, 'WAL continuo');
+  s += line(P, 548, 282, 631, 282) + lbl(590, 275, 'copia diaria');
+  s += line(P, 700, 302, 700, 321) + lbl(708, 316, 'reproduce el WAL', 'start');
+
+  // Copia fuera del campus
+  s += path(P, 'M632,296 H590 V445 H549');
+  s += lbl(584, 400, 'copia semanal cifrada', 'end');
+  s += `<g><rect x="52" y="420" width="496" height="50" rx="5" class="d-box"/>` +
+    `<path d="M70,434 v16 a8,3 0 0 0 16,0 v-16" class="d-cyl"/><ellipse cx="78" cy="434" rx="8" ry="3" class="d-cyl"/>` +
+    `<text x="98" y="441" class="t-title">SSD externos del plan, en rotación</text>` +
+    `<text x="98" y="457" class="t-sub">guardados fuera del campus · tercera copia de la regla 3-2-1</text></g>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Despliegue en los dos servidores del plan: producción y staging en el servidor sin GPU; observabilidad, respaldos, PostgreSQL en espera, no producción, CI e IA en el servidor con GPU; copia semanal cifrada en SSD externos fuera del campus." xmlns="http://www.w3.org/2000/svg" class="diagram d-mid">${markers(P)}${s}</svg>`;
 }
 
 // ---------- Página ----------
@@ -401,7 +401,7 @@ const hallazgos = [
   ['C', 'Arquitectura sin definir', 'No hay catálogo de servicios, contratos, datos, mensajería, seguridad ni despliegue.'],
   ['C', 'Sin requisitos no funcionales', 'Ni concurrencia de matrícula, ni disponibilidad, ni RPO/RTO, ni accesibilidad.'],
   ['C', 'Faltan roles críticos', 'No hay arquitecto, DevOps/SRE, seguridad ni DBA en un proyecto de microservicios.'],
-  ['C', 'Dos servidores, sin alta disponibilidad', 'Kubernetes y una base replicada necesitan al menos 3 nodos. No hay respaldo ni sitio alterno.'],
+  ['C', 'Dos servidores, sin alta disponibilidad', 'La alta disponibilidad exige 3 nodos. Se mantienen los 2 servidores, con respaldo y plan de contingencia.'],
   ['C', 'Seguridad solo enunciada', 'No cita la NTP-ISO/IEC 27001 ni la Ley N.° 29733, y se tratarán datos biométricos.'],
   ['A', 'Módulos por organigrama', 'DASA, Facultades y Escuelas repiten planes, secciones y horarios. Pregrado y posgrado no son módulos.'],
   ['A', 'Construir lo que ya existe', 'Aula virtual, logística, tesorería y planillas ya los resuelven Moodle, SIGA, SIAF y AIRHSP.'],
@@ -437,27 +437,16 @@ const entregas = [
 ];
 
 const equipo = [
-  ['Jefe de proyecto / Scrum Master', '1', '7,000', 'Se mantiene'],
-  ['Arquitecto de software', '1', '9,000', 'Nuevo'],
-  ['Ingeniero DevOps/SRE', '1', '8,000', 'Nuevo'],
-  ['Especialista en seguridad', '1', '7,500', 'Nuevo'],
-  ['Arquitecto de datos / DBA', '1', '7,000', 'Nuevo'],
-  ['Analista funcional', '2', '6,000', '+1'],
-  ['Diseñador UX/UI', '1', '6,000', 'Solo UX/UI'],
-  ['Backend senior (líder técnico)', '3', '7,000', '−1'],
-  ['Frontend', '1', '6,000', '−3'],
-  ['QA de automatización', '1', '5,500', 'Automatiza'],
-];
-
-const presupuesto = [
-  ['Servicios profesionales (13 perfiles, 4 meses)', '356,000'],
-  ['3 nodos de cómputo homogéneos', '240,000'],
-  ['NAS de respaldo con snapshots inmutables', '35,000'],
-  ['2 switches de 10/25 GbE', '24,000'],
-  ['13 equipos de desarrollo', '71,500'],
-  ['13 monitores IPS de 27"', '15,600'],
-  ['1 impresora multifuncional', '3,500'],
-  ['2 SSD externos cifrados', '1,600'],
+  ['Coordinador / Jefe de proyecto', 'Jefe de proyecto y Scrum Master; enlace con los dueños de proceso'],
+  ['Programador senior 1', 'Arquitecto y líder técnico: ADRs, contratos, revisión final'],
+  ['Programador senior 2', 'Plataforma y seguridad: Proxmox, Kubernetes, CI/CD, respaldos, Keycloak'],
+  ['Programador senior 3', 'Servicios transversales y dueño del modelo de datos'],
+  ['Programador senior 4', 'Trámite y documentos (Mesa de Partes Virtual)'],
+  ['Programadores junior (4)', 'Frontend y fullstack en pareja con un senior'],
+  ['Analista funcional', 'Event Storming, historias, BDD y UAT'],
+  ['Diseñador UX/UI/BD', 'UX/UI y sistema de diseño; apoyo al modelo de datos'],
+  ['Testeador (QA)', 'Automatización E2E y pruebas de carga'],
+  ['Documentador', 'Docs-as-code: manuales, runbooks, ADRs'],
 ];
 
 const months = ['N', 'D', 'E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D', 'E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
@@ -606,8 +595,8 @@ tfoot td { font-weight: 600; background: var(--panel); }
     <p class="meta">Análisis del 12 de octubre de 2026 · 34 microservicios + 4 BFF · 5 entregas entre nov 2026 y dic 2028</p>
     <div class="changes">
       <div class="change"><b>Entregas, no un big bang</b><span>2026 se dedica a fundaciones y a un primer flujo en producción.</span></div>
-      <div class="change"><b>Mismo equipo, otros roles</b><span>13 personas con arquitecto, DevOps, seguridad y datos.</span></div>
-      <div class="change"><b>3 nodos y respaldo 3-2-1</b><span>Alta disponibilidad real; la GPU espera a la entrega de IA.</span></div>
+      <div class="change"><b>Mismo equipo, roles claros</b><span>Los 13 perfiles cubren arquitectura, plataforma y datos.</span></div>
+      <div class="change"><b>Dos servidores bien repartidos</b><span>Producción en uno; copias, réplica y monitoreo en el otro.</span></div>
       <div class="change"><b>Integrar antes que construir</b><span>Moodle, Koha, DSpace, SIAF, SIGA, AIRHSP y FirmaPerú.</span></div>
       <div class="change"><b>Migración progresiva</b><span>El SIGEUN 1.0 se reemplaza por rutas, dominio por dominio.</span></div>
     </div>
@@ -677,12 +666,12 @@ tfoot td { font-weight: 600; background: var(--panel); }
     <figure>
       <div class="fig-head">
         <h2 id="h-dep">Dónde corre</h2>
-        <p class="prose">Con dos servidores, la caída de uno detiene el sistema. Tres nodos homogéneos dan quórum a Kubernetes, PostgreSQL y RabbitMQ, y el respaldo vive fuera del clúster y fuera del campus.</p>
+        <p class="prose">Se usan los dos servidores del plan. Producción va en el que tiene RAID y más memoria; las copias, la réplica en espera y el monitoreo van en el otro, para que sobrevivan si producción falla.</p>
       </div>
       <div class="scroll" tabindex="0" role="region" aria-label="Diagrama de despliegue">
         ${diagramaDespliegue()}
       </div>
-      <figcaption>Producción y no producción son clústeres separados repartidos en los tres nodos. Ninguna réplica de un servicio crítico comparte host. El nodo con GPU queda fuera de la compra 2026.</figcaption>
+      <figcaption>No hay alta disponibilidad de hardware: si el servidor 1 falla, se conmuta al servidor 2 siguiendo el runbook (apagar dev y qa, promover la réplica, desplegar desde Git; meta de 4 horas). Las GPU se usan para OCR de actas antiguas e IA sin sacar datos personales de la universidad.</figcaption>
     </figure>
   </section>
 
@@ -701,29 +690,17 @@ tfoot td { font-weight: 600; background: var(--panel); }
   </section>
 
   <section class="narrow stack" aria-labelledby="h-eq">
-    <h2 id="h-eq">Equipo y presupuesto 2026 con el mismo techo</h2>
-    <p class="prose">Se mantienen 13 personas y S/ 747,800. Cambia la composición: entran los cuatro perfiles que hacen viables los microservicios, y el hardware pasa de dos servidores y equipos sobredimensionados a una base con alta disponibilidad y respaldo. Montos referenciales, sujetos a estudio de mercado.</p>
-    <div class="two">
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Perfil</th><th class="num">Cant.</th><th class="num">S/ mes</th><th>Cambio</th></tr></thead>
-          <tbody>
-            ${equipo.map(([p, c, h, d]) => `<tr><td>${esc(p)}</td><td class="num">${c}</td><td class="num">${h}</td><td>${esc(d)}</td></tr>`).join('\n            ')}
-          </tbody>
-          <tfoot><tr><td>Total mensual</td><td class="num">13</td><td class="num">89,000</td><td></td></tr></tfoot>
-        </table>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Rubro</th><th class="num">S/</th></tr></thead>
-          <tbody>
-            ${presupuesto.map(([r, m]) => `<tr><td>${esc(r)}</td><td class="num">${m}</td></tr>`).join('\n            ')}
-          </tbody>
-          <tfoot><tr><td>Total (techo del plan: 747,800)</td><td class="num">747,200</td></tr></tfoot>
-        </table>
-      </div>
+    <h2 id="h-eq">Equipo: los perfiles del plan con responsabilidades claras</h2>
+    <p class="prose">Se mantienen los 13 perfiles y los equipos del plan. Para cubrir los roles que el plan no tenía (arquitectura, plataforma, seguridad y datos) sin cambiar contratos, cada perfil asume responsabilidades concretas. La OTI suma al menos dos servidores de planta para asegurar la continuidad.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Perfil del plan</th><th>Responsabilidad en SIGEUN 2.0</th></tr></thead>
+        <tbody>
+          ${equipo.map(([p, r]) => `<tr><td>${esc(p)}</td><td>${esc(r)}</td></tr>`).join('\n          ')}
+        </tbody>
+      </table>
     </div>
-    <p class="hint">Si los servicios empiezan en noviembre de 2026, los cuatro meses llegan a febrero de 2027 y requieren previsión presupuestal 2027. Mover montos entre específicas de gasto requiere modificación presupuestaria.</p>
+    <p class="hint">Necesidades para el presupuesto 2027: discos para las bahías libres del servidor 1, tarjeta de 10 GbE, redundancia de disco en el servidor 2 y un tercer nodo cuando se busque alta disponibilidad.</p>
   </section>
 
   <section class="narrow stack" aria-labelledby="h-docs">
@@ -733,7 +710,8 @@ tfoot td { font-weight: 600; background: var(--panel); }
       <a href="https://github.com/Mermas-CC/sigeun2.0/blob/claude/microservices-architecture-plan-cufm1i/docs/01-analisis-critico-del-plan.md"><b>1. Análisis crítico</b><span>34 hallazgos con evidencia, 10 inconsistencias y brechas de ingeniería.</span></a>
       <a href="https://github.com/Mermas-CC/sigeun2.0/blob/claude/microservices-architecture-plan-cufm1i/docs/02-propuesta-tecnica-mejorada.md"><b>2. Propuesta técnica</b><span>Metodología 12207, requisitos no funcionales, pruebas, seguridad, equipo, riesgos e indicadores.</span></a>
       <a href="https://github.com/Mermas-CC/sigeun2.0/blob/claude/microservices-architecture-plan-cufm1i/docs/03-arquitectura-microservicios.md"><b>3. Arquitectura</b><span>Catálogo de servicios, eventos, datos, seguridad, CI/CD, despliegue y stack.</span></a>
-      <a href="https://github.com/Mermas-CC/sigeun2.0/tree/claude/microservices-architecture-plan-cufm1i/docs/adr"><b>Decisiones (ADR)</b><span>Nueve decisiones de arquitectura con alternativas y consecuencias.</span></a>
+      <a href="https://github.com/Mermas-CC/sigeun2.0/blob/claude/microservices-architecture-plan-cufm1i/docs/04-guia-de-estudio.md"><b>4. Guía de estudio</b><span>Qué aprender y en qué orden, uso de los equipos del plan y cómo trabajar con Claude Code.</span></a>
+      <a href="https://github.com/Mermas-CC/sigeun2.0/tree/claude/microservices-architecture-plan-cufm1i/docs/adr"><b>Decisiones (ADR)</b><span>Diez decisiones de arquitectura con alternativas y consecuencias.</span></a>
     </div>
   </section>
 </main>

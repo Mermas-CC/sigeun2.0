@@ -11,7 +11,7 @@ Diagramas principales (también en [`diagramas/`](../diagramas)):
 | Arquitectura completa por capas (34 microservicios + 4 BFF) | [`01-arquitectura-microservicios.svg`](../diagramas/01-arquitectura-microservicios.svg) / [`.png`](../diagramas/01-arquitectura-microservicios.png) |
 | Saga de matrícula con pago | [`02-saga-matricula.svg`](../diagramas/02-saga-matricula.svg) / [`.png`](../diagramas/02-saga-matricula.png) |
 | Migración progresiva desde el SIGEUN 1.0 | [`03-migracion-strangler.svg`](../diagramas/03-migracion-strangler.svg) / [`.png`](../diagramas/03-migracion-strangler.png) |
-| Topología de despliegue | [`04-despliegue.svg`](../diagramas/04-despliegue.svg) / [`.png`](../diagramas/04-despliegue.png) |
+| Topología de despliegue (2 servidores del plan) | [`04-despliegue.svg`](../diagramas/04-despliegue.svg) / [`.png`](../diagramas/04-despliegue.png) |
 | Página interactiva con todos los diagramas | [`sigeun2-arquitectura.html`](../diagramas/sigeun2-arquitectura.html) |
 
 Los diagramas en Mermaid de este documento son la versión **"diagrama como código"**: se editan en Git y GitHub los muestra directamente.
@@ -427,29 +427,42 @@ flowchart LR
 
 ## 3.13 Topología de despliegue
 
+> **Decisión vigente ([ADR-0010](adr/ADR-0010-despliegue-con-los-equipos-del-plan.md)):** se usan los **dos servidores del plan original**. La topología de 3 nodos de [ADR-0005](adr/ADR-0005-plataforma-kubernetes-gitops.md) queda como objetivo de crecimiento. El detalle de recursos y el procedimiento de contingencia están en la [guía de estudio, sección 7](04-guia-de-estudio.md#7-los-equipos-del-plan-cómo-sacarles-provecho).
+
 ```mermaid
 flowchart TB
   INET(("Internet")) --> FW["Firewall perimetral"]
-  FW --> DMZ["DMZ: WAF / proxy inverso<br/>2 VM con IP virtual"]
-  DMZ --> NET["Red de servidores 10/25 GbE redundante"]
-  subgraph CL["Clúster de virtualización (3 nodos homogéneos)"]
-    direction LR
-    N1["Nodo 1<br/>k8s-prod · k8s-noprod<br/>PostgreSQL primaria<br/>RabbitMQ"]
-    N2["Nodo 2<br/>k8s-prod · k8s-noprod<br/>PostgreSQL réplica sync<br/>RabbitMQ"]
-    N3["Nodo 3<br/>k8s-prod · k8s-noprod<br/>PostgreSQL réplica async<br/>RabbitMQ"]
+  FW --> RP["Proxy inverso + WAF<br/>VM en DMZ"]
+  subgraph S1["Servidor 1 · sin GPU · producción"]
+    direction TB
+    P1["k8s-prod: 3 VM<br/>microservicios · Keycloak · RabbitMQ"]
+    PG1[("PostgreSQL primaria")]
+    OB1[("Objetos de producción")]
+    STG["k8s-staging: 1 VM con cuotas"]
   end
-  NET --> CL
-  N1 <-->|replicación| N2
-  N1 -->|replicación| N3
-  CL -->|WAL continuo + snapshots| NAS[("NAS de respaldo<br/>snapshots inmutables")]
-  NAS -->|copia cifrada diaria| DR[("Sitio alterno<br/>sede Ilo o nube")]
-  GPU["Nodo GPU<br/>se adquiere en R4"] -.-> CL
+  subgraph S2["Servidor 2 · con GPU · todo lo demás"]
+    direction TB
+    NP["k8s-noprod: dev y qa"]
+    CI["Runner de CI · Harbor"]
+    OBS["Observabilidad"]
+    BK[("Respaldos: WAL, Proxmox Backup Server,<br/>réplica de objetos")]
+    SB[("PostgreSQL en espera")]
+    IA["VM ia-lab con las 2 GPU, a demanda"]
+  end
+  RP --> P1
+  P1 --> PG1
+  P1 --> OB1
+  PG1 -->|WAL continuo| BK
+  BK -->|reproduce el WAL| SB
+  OB1 -->|copia nocturna| BK
+  P1 -.->|métricas, logs y trazas| OBS
+  BK -->|copia semanal cifrada| SSD[("SSD externos en rotación<br/>fuera del campus")]
 ```
 
-- **Clústeres separados** para producción y no producción (`dev`, `qa`, `staging`), ambos con nodos repartidos en los 3 hosts.
-- Antiafinidad: ninguna réplica de un mismo servicio crítico comparte host.
-- **RPO ≤ 15 min** con WAL continuo; **RTO ≤ 4 h** con restauración probada cada trimestre.
-- Escalado horizontal automático (HPA) en `matricula`, `pagos`, `admision` y los BFF.
+- **Producción y staging** en el servidor 1 (RAID 1, fuentes redundantes, 768 GB de RAM); **todas las copias y la observabilidad** en el servidor 2, para que sobrevivan a la falla de producción.
+- **Sin alta disponibilidad de hardware:** ante la caída del servidor 1 se conmuta al servidor 2 con el runbook (apagar dev/qa, promover la réplica, desplegar desde Git). Metas: **RPO ≤ 15 min** (base de datos), **RTO ≤ 4 h**. Simulacro dos veces al año.
+- Producción usa 3 VM de Kubernetes para actualizar nodos sin cortar el servicio; antiafinidad entre VMs para las réplicas de servicios críticos.
+- Escalado horizontal automático (HPA) en `matricula`, `pagos`, `admision` y los BFF, dentro de la capacidad del servidor 1.
 
 ## 3.14 Observabilidad
 

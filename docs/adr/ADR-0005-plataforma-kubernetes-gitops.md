@@ -1,6 +1,6 @@
 # ADR-0005: Kubernetes on-premise de 3 nodos con GitOps
 
-- Estado: Propuesto
+- Estado: Reemplazado por [ADR-0010](ADR-0010-despliegue-con-los-equipos-del-plan.md) para 2026 (se mantiene como objetivo de crecimiento)
 - Fecha: 2026-10-12
 - Decisores: autoridad de diseño SIGEUN 2.0
 

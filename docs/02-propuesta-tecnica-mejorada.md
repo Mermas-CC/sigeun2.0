@@ -183,6 +183,8 @@ El pipeline completo está diagramado en el [doc. 03, sec. 3.12](03-arquitectura
 
 ## 2.10 Equipo y organización
 
+> Si los perfiles contratados no pueden cambiar, la [guía de estudio, sección 8](04-guia-de-estudio.md#8-el-equipo-roles-del-plan-con-responsabilidades-claras) asigna estas responsabilidades a los 13 perfiles del plan original.
+
 ### Fase 0: mismo número de personas (13), otra composición
 
 | Perfil | Cant. | Responsabilidad | Cambio respecto al plan |
@@ -214,6 +216,8 @@ El pipeline completo está diagramado en el [doc. 03, sec. 3.12](03-arquitectura
 Total referencial: **22–25 personas** (unos S/ 1.9–2.2 millones por año). Escenario mínimo: **16 personas con 2 squads**, extendiendo R3 y R4 hasta 2029. Los dueños de proceso (DASA, Escuelas, Tesorería, OGC, DBU, etc.) actúan como **Product Owners**, con dedicación formalizada por resolución.
 
 ## 2.11 Infraestructura y presupuesto 2026 reformulado
+
+> **Actualización (12/10/2026):** la entidad decidió **mantener los equipos del plan original**. Para 2026 rige [ADR-0010](adr/ADR-0010-despliegue-con-los-equipos-del-plan.md) y la distribución de la [guía de estudio, sección 7](04-guia-de-estudio.md#7-los-equipos-del-plan-cómo-sacarles-provecho). Esta sección queda como referencia para las compras de 2027 en adelante.
 
 **Infraestructura mínima viable para microservicios en producción:**
 

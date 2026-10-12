@@ -142,8 +142,8 @@ tfoot td { font-weight: 600; background: var(--panel); }
     <p class="meta">Análisis del 12 de octubre de 2026 · 34 microservicios + 4 BFF · 5 entregas entre nov 2026 y dic 2028</p>
     <div class="changes">
       <div class="change"><b>Entregas, no un big bang</b><span>2026 se dedica a fundaciones y a un primer flujo en producción.</span></div>
-      <div class="change"><b>Mismo equipo, otros roles</b><span>13 personas con arquitecto, DevOps, seguridad y datos.</span></div>
-      <div class="change"><b>3 nodos y respaldo 3-2-1</b><span>Alta disponibilidad real; la GPU espera a la entrega de IA.</span></div>
+      <div class="change"><b>Mismo equipo, roles claros</b><span>Los 13 perfiles cubren arquitectura, plataforma y datos.</span></div>
+      <div class="change"><b>Dos servidores bien repartidos</b><span>Producción en uno; copias, réplica y monitoreo en el otro.</span></div>
       <div class="change"><b>Integrar antes que construir</b><span>Moodle, Koha, DSpace, SIAF, SIGA, AIRHSP y FirmaPerú.</span></div>
       <div class="change"><b>Migración progresiva</b><span>El SIGEUN 1.0 se reemplaza por rutas, dominio por dominio.</span></div>
     </div>
@@ -158,7 +158,7 @@ tfoot td { font-weight: 600; background: var(--panel); }
       <li><span class="sev c">CRÍTICO</span><div><b>Arquitectura sin definir</b><span class="t">No hay catálogo de servicios, contratos, datos, mensajería, seguridad ni despliegue.</span></div></li>
       <li><span class="sev c">CRÍTICO</span><div><b>Sin requisitos no funcionales</b><span class="t">Ni concurrencia de matrícula, ni disponibilidad, ni RPO/RTO, ni accesibilidad.</span></div></li>
       <li><span class="sev c">CRÍTICO</span><div><b>Faltan roles críticos</b><span class="t">No hay arquitecto, DevOps/SRE, seguridad ni DBA en un proyecto de microservicios.</span></div></li>
-      <li><span class="sev c">CRÍTICO</span><div><b>Dos servidores, sin alta disponibilidad</b><span class="t">Kubernetes y una base replicada necesitan al menos 3 nodos. No hay respaldo ni sitio alterno.</span></div></li>
+      <li><span class="sev c">CRÍTICO</span><div><b>Dos servidores, sin alta disponibilidad</b><span class="t">La alta disponibilidad exige 3 nodos. Se mantienen los 2 servidores, con respaldo y plan de contingencia.</span></div></li>
       <li><span class="sev c">CRÍTICO</span><div><b>Seguridad solo enunciada</b><span class="t">No cita la NTP-ISO/IEC 27001 ni la Ley N.° 29733, y se tratarán datos biométricos.</span></div></li>
       <li><span class="sev a">ALTO</span><div><b>Módulos por organigrama</b><span class="t">DASA, Facultades y Escuelas repiten planes, secciones y horarios. Pregrado y posgrado no son módulos.</span></div></li>
       <li><span class="sev a">ALTO</span><div><b>Construir lo que ya existe</b><span class="t">Aula virtual, logística, tesorería y planillas ya los resuelven Moodle, SIGA, SIAF y AIRHSP.</span></div></li>
@@ -247,15 +247,15 @@ tfoot td { font-weight: 600; background: var(--panel); }
     <figure>
       <div class="fig-head">
         <h2 id="h-dep">Dónde corre</h2>
-        <p class="prose">Con dos servidores, la caída de uno detiene el sistema. Tres nodos homogéneos dan quórum a Kubernetes, PostgreSQL y RabbitMQ, y el respaldo vive fuera del clúster y fuera del campus.</p>
+        <p class="prose">Se usan los dos servidores del plan. Producción va en el que tiene RAID y más memoria; las copias, la réplica en espera y el monitoreo van en el otro, para que sobrevivan si producción falla.</p>
       </div>
       <div class="scroll" tabindex="0" role="region" aria-label="Diagrama de despliegue">
-        <svg viewBox="0 0 1180 548" role="img" aria-label="Despliegue en tres nodos homogéneos con clústeres Kubernetes de producción y no producción, PostgreSQL con una primaria y dos réplicas, RabbitMQ con tres réplicas, respaldo en NAS y copia cifrada diaria en un sitio alterno." xmlns="http://www.w3.org/2000/svg" class="diagram d-mid"><defs>
+        <svg viewBox="0 0 1180 540" role="img" aria-label="Despliegue en los dos servidores del plan: producción y staging en el servidor sin GPU; observabilidad, respaldos, PostgreSQL en espera, no producción, CI e IA en el servidor con GPU; copia semanal cifrada en SSD externos fuera del campus." xmlns="http://www.w3.org/2000/svg" class="diagram d-mid"><defs>
   <marker id="d4-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker>
   <marker id="d4-e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah-ev"/></marker>
-</defs><circle cx="76" cy="60" r="34" class="d-ext"/><text x="76" y="64" text-anchor="middle" class="t-title">Internet</text><g><rect x="150" y="36" width="180" height="48" rx="5" class="d-box"/><text x="160" y="57" class="t-title">Firewall perimetral</text><text x="160" y="73" class="t-sub">filtrado y VPN de gestión</text></g><g><rect x="390" y="36" width="250" height="48" rx="5" class="d-acc"/><text x="400" y="57" class="t-title">DMZ · WAF / proxy inverso</text><text x="400" y="73" class="t-sub">2 VM con IP virtual</text></g><line x1="110" y1="60" x2="149" y2="60" class="d-edge" marker-end="url(#d4-a)"/><line x1="330" y1="60" x2="389" y2="60" class="d-edge" marker-end="url(#d4-a)"/><line x1="515" y1="84" x2="515" y2="129" class="d-edge" marker-end="url(#d4-a)"/><rect x="40" y="130" width="1100" height="28" rx="5" class="d-bus"/><text x="590" y="149" text-anchor="middle" class="t-bus">Red de servidores · 10/25 GbE · 2 switches redundantes</text><line x1="210" y1="158" x2="210" y2="185" class="d-edge" marker-end="url(#d4-a)"/><rect x="40" y="186" width="340" height="216" rx="8" class="d-panel"/><text x="52" y="203" class="t-group">Nodo 1 · Proxmox VE</text><g><rect x="52" y="216" width="316" height="38" rx="5" class="d-box"/><text x="62" y="232" class="t-title">VM k8s-prod</text><text x="62" y="248" class="t-sub">control plane + worker</text></g><g><rect x="52" y="262" width="316" height="38" rx="5" class="d-box"/><text x="62" y="278" class="t-title">VM k8s-noprod</text><text x="62" y="294" class="t-sub">dev · qa · staging</text></g><g><rect x="52" y="308" width="316" height="38" rx="5" class="d-box"/><text x="62" y="324" class="t-title">RabbitMQ</text><text x="62" y="340" class="t-sub">cola quorum, 1 de 3 réplicas</text></g><g><rect x="52" y="354" width="316" height="38" rx="5" class="d-acc"/><text x="62" y="370" class="t-title">PostgreSQL primaria</text><text x="62" y="386" class="t-sub">CloudNativePG</text></g><line x1="590" y1="158" x2="590" y2="185" class="d-edge" marker-end="url(#d4-a)"/><rect x="420" y="186" width="340" height="216" rx="8" class="d-panel"/><text x="432" y="203" class="t-group">Nodo 2 · Proxmox VE</text><g><rect x="432" y="216" width="316" height="38" rx="5" class="d-box"/><text x="442" y="232" class="t-title">VM k8s-prod</text><text x="442" y="248" class="t-sub">control plane + worker</text></g><g><rect x="432" y="262" width="316" height="38" rx="5" class="d-box"/><text x="442" y="278" class="t-title">VM k8s-noprod</text><text x="442" y="294" class="t-sub">dev · qa · staging</text></g><g><rect x="432" y="308" width="316" height="38" rx="5" class="d-box"/><text x="442" y="324" class="t-title">RabbitMQ</text><text x="442" y="340" class="t-sub">cola quorum, 1 de 3 réplicas</text></g><g><rect x="432" y="354" width="316" height="38" rx="5" class="d-acc"/><text x="442" y="370" class="t-title">PostgreSQL réplica síncrona</text><text x="442" y="386" class="t-sub">CloudNativePG</text></g><line x1="970" y1="158" x2="970" y2="185" class="d-edge" marker-end="url(#d4-a)"/><rect x="800" y="186" width="340" height="216" rx="8" class="d-panel"/><text x="812" y="203" class="t-group">Nodo 3 · Proxmox VE</text><g><rect x="812" y="216" width="316" height="38" rx="5" class="d-box"/><text x="822" y="232" class="t-title">VM k8s-prod</text><text x="822" y="248" class="t-sub">control plane + worker</text></g><g><rect x="812" y="262" width="316" height="38" rx="5" class="d-box"/><text x="822" y="278" class="t-title">VM k8s-noprod</text><text x="822" y="294" class="t-sub">dev · qa · staging</text></g><g><rect x="812" y="308" width="316" height="38" rx="5" class="d-box"/><text x="822" y="324" class="t-title">RabbitMQ</text><text x="822" y="340" class="t-sub">cola quorum, 1 de 3 réplicas</text></g><g><rect x="812" y="354" width="316" height="38" rx="5" class="d-acc"/><text x="822" y="370" class="t-title">PostgreSQL réplica asíncrona</text><text x="822" y="386" class="t-sub">CloudNativePG</text></g><line x1="368" y1="373" x2="431" y2="373" class="d-edge" marker-end="url(#d4-a)"/><text x="400" y="366" text-anchor="middle" class="t-edge halo">síncrona</text><path d="M250,392 V420 H970 V393" class="d-edge" marker-end="url(#d4-a)"/><text x="610" y="414" text-anchor="middle" class="t-edge halo">réplica asíncrona (WAL)</text><line x1="120" y1="402" x2="120" y2="465" class="d-edge" marker-end="url(#d4-a)"/><text x="128" y="446" text-anchor="start" class="t-edge halo">WAL continuo · pgBackRest · Velero</text><g><rect x="40" y="466" width="300" height="56" rx="5" class="d-box"/><path d="M58,482 v16 a8,3 0 0 0 16,0 v-16" class="d-cyl"/><ellipse cx="66" cy="482" rx="8" ry="3" class="d-cyl"/><text x="86" y="489" class="t-title">NAS de respaldo</text><text x="86" y="505" class="t-sub">snapshots inmutables · RPO ≤ 15 min</text></g><g><rect x="460" y="466" width="300" height="56" rx="5" class="d-ext"/><text x="470" y="491" class="t-title">Sitio alterno</text><text x="470" y="507" class="t-sub">sede Ilo o nube · RTO ≤ 4 h</text></g><line x1="340" y1="494" x2="459" y2="494" class="d-edge" marker-end="url(#d4-a)"/><text x="400" y="487" text-anchor="middle" class="t-edge halo">copia cifrada diaria</text><g><rect x="800" y="466" width="340" height="56" rx="5" class="d-ext"/><text x="810" y="491" class="t-title">Nodo GPU (se compra en R4)</text><text x="810" y="507" class="t-sub">se suma al clúster cuando exista el caso de IA</text></g><line x1="1100" y1="466" x2="1100" y2="403" class="d-edge d-edge-dash" marker-end="url(#d4-a)"/></svg>
+</defs><circle cx="76" cy="60" r="34" class="d-ext"/><text x="76" y="64" text-anchor="middle" class="t-title">Internet</text><g><rect x="150" y="36" width="180" height="48" rx="5" class="d-box"/><text x="160" y="57" class="t-title">Firewall perimetral</text><text x="160" y="73" class="t-sub">filtrado y VPN de gestión</text></g><g><rect x="390" y="36" width="250" height="48" rx="5" class="d-acc"/><text x="400" y="57" class="t-title">Proxy inverso + WAF</text><text x="400" y="73" class="t-sub">VM en la DMZ del servidor 1</text></g><line x1="110" y1="60" x2="149" y2="60" class="d-edge" marker-end="url(#d4-a)"/><line x1="330" y1="60" x2="389" y2="60" class="d-edge" marker-end="url(#d4-a)"/><line x1="420" y1="84" x2="420" y2="129" class="d-edge" marker-end="url(#d4-a)"/><rect x="40" y="130" width="520" height="234" rx="8" class="d-panel"/><text x="52" y="147" class="t-group">Servidor 1 · sin GPU · producción</text><text x="548" y="147" text-anchor="end" class="t-count">48 NÚCLEOS · 768 GB · RAID 1</text><g><rect x="52" y="166" width="496" height="40" rx="5" class="d-acc"/><text x="62" y="183" class="t-title">k8s-prod · 3 VM</text><text x="62" y="199" class="t-sub">microservicios, Keycloak, RabbitMQ</text></g><g><rect x="52" y="214" width="496" height="40" rx="5" class="d-acc"/><text x="62" y="231" class="t-title">PostgreSQL primaria</text><text x="62" y="247" class="t-sub">CloudNativePG</text></g><g><rect x="52" y="262" width="496" height="40" rx="5" class="d-box"/><text x="62" y="279" class="t-title">Objetos de producción</text><text x="62" y="295" class="t-sub">documentos y adjuntos</text></g><g><rect x="52" y="310" width="496" height="40" rx="5" class="d-box"/><text x="62" y="327" class="t-title">k8s-staging · 1 VM</text><text x="62" y="343" class="t-sub">con cuotas de CPU y RAM</text></g><rect x="620" y="130" width="520" height="390" rx="8" class="d-panel"/><text x="632" y="147" class="t-group">Servidor 2 · con GPU · todo lo demás</text><text x="1128" y="147" text-anchor="end" class="t-count">32 NÚCLEOS · 128 GB · 2 GPU</text><g><rect x="632" y="166" width="496" height="40" rx="5" class="d-box"/><text x="642" y="183" class="t-title">Observabilidad</text><text x="642" y="199" class="t-sub">Prometheus, Loki, Tempo, Grafana</text></g><g><rect x="632" y="214" width="496" height="88" rx="5" class="d-box"/><text x="642" y="255" class="t-title">Respaldos</text><text x="642" y="271" class="t-sub">WAL de PostgreSQL · Proxmox Backup Server · réplica de objetos</text></g><g><rect x="632" y="322" width="496" height="40" rx="5" class="d-acc"/><text x="642" y="339" class="t-title">PostgreSQL en espera</text><text x="642" y="355" class="t-sub">se promueve si falla el servidor 1</text></g><g><rect x="632" y="370" width="496" height="40" rx="5" class="d-box"/><text x="642" y="387" class="t-title">k8s-noprod</text><text x="642" y="403" class="t-sub">dev y qa</text></g><g><rect x="632" y="418" width="496" height="40" rx="5" class="d-box"/><text x="642" y="435" class="t-title">Runner de CI + Harbor</text><text x="642" y="451" class="t-sub">compilación, pruebas, imágenes</text></g><g><rect x="632" y="466" width="496" height="40" rx="5" class="d-box"/><text x="642" y="483" class="t-title">VM ia-lab con las 2 GPU</text><text x="642" y="499" class="t-sub">OCR de actas e IA, encendida a demanda</text></g><line x1="548" y1="186" x2="631" y2="186" class="d-edge" marker-end="url(#d4-a)"/><text x="590" y="179" text-anchor="middle" class="t-edge halo">telemetría</text><line x1="548" y1="234" x2="631" y2="234" class="d-edge" marker-end="url(#d4-a)"/><text x="590" y="227" text-anchor="middle" class="t-edge halo">WAL continuo</text><line x1="548" y1="282" x2="631" y2="282" class="d-edge" marker-end="url(#d4-a)"/><text x="590" y="275" text-anchor="middle" class="t-edge halo">copia diaria</text><line x1="700" y1="302" x2="700" y2="321" class="d-edge" marker-end="url(#d4-a)"/><text x="708" y="316" text-anchor="start" class="t-edge halo">reproduce el WAL</text><path d="M632,296 H590 V445 H549" class="d-edge" marker-end="url(#d4-a)"/><text x="584" y="400" text-anchor="end" class="t-edge halo">copia semanal cifrada</text><g><rect x="52" y="420" width="496" height="50" rx="5" class="d-box"/><path d="M70,434 v16 a8,3 0 0 0 16,0 v-16" class="d-cyl"/><ellipse cx="78" cy="434" rx="8" ry="3" class="d-cyl"/><text x="98" y="441" class="t-title">SSD externos del plan, en rotación</text><text x="98" y="457" class="t-sub">guardados fuera del campus · tercera copia de la regla 3-2-1</text></g></svg>
       </div>
-      <figcaption>Producción y no producción son clústeres separados repartidos en los tres nodos. Ninguna réplica de un servicio crítico comparte host. El nodo con GPU queda fuera de la compra 2026.</figcaption>
+      <figcaption>No hay alta disponibilidad de hardware: si el servidor 1 falla, se conmuta al servidor 2 siguiendo el runbook (apagar dev y qa, promover la réplica, desplegar desde Git; meta de 4 horas). Las GPU se usan para OCR de actas antiguas e IA sin sacar datos personales de la universidad.</figcaption>
     </figure>
   </section>
 
@@ -278,45 +278,26 @@ tfoot td { font-weight: 600; background: var(--panel); }
   </section>
 
   <section class="narrow stack" aria-labelledby="h-eq">
-    <h2 id="h-eq">Equipo y presupuesto 2026 con el mismo techo</h2>
-    <p class="prose">Se mantienen 13 personas y S/ 747,800. Cambia la composición: entran los cuatro perfiles que hacen viables los microservicios, y el hardware pasa de dos servidores y equipos sobredimensionados a una base con alta disponibilidad y respaldo. Montos referenciales, sujetos a estudio de mercado.</p>
-    <div class="two">
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Perfil</th><th class="num">Cant.</th><th class="num">S/ mes</th><th>Cambio</th></tr></thead>
-          <tbody>
-            <tr><td>Jefe de proyecto / Scrum Master</td><td class="num">1</td><td class="num">7,000</td><td>Se mantiene</td></tr>
-            <tr><td>Arquitecto de software</td><td class="num">1</td><td class="num">9,000</td><td>Nuevo</td></tr>
-            <tr><td>Ingeniero DevOps/SRE</td><td class="num">1</td><td class="num">8,000</td><td>Nuevo</td></tr>
-            <tr><td>Especialista en seguridad</td><td class="num">1</td><td class="num">7,500</td><td>Nuevo</td></tr>
-            <tr><td>Arquitecto de datos / DBA</td><td class="num">1</td><td class="num">7,000</td><td>Nuevo</td></tr>
-            <tr><td>Analista funcional</td><td class="num">2</td><td class="num">6,000</td><td>+1</td></tr>
-            <tr><td>Diseñador UX/UI</td><td class="num">1</td><td class="num">6,000</td><td>Solo UX/UI</td></tr>
-            <tr><td>Backend senior (líder técnico)</td><td class="num">3</td><td class="num">7,000</td><td>−1</td></tr>
-            <tr><td>Frontend</td><td class="num">1</td><td class="num">6,000</td><td>−3</td></tr>
-            <tr><td>QA de automatización</td><td class="num">1</td><td class="num">5,500</td><td>Automatiza</td></tr>
-          </tbody>
-          <tfoot><tr><td>Total mensual</td><td class="num">13</td><td class="num">89,000</td><td></td></tr></tfoot>
-        </table>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Rubro</th><th class="num">S/</th></tr></thead>
-          <tbody>
-            <tr><td>Servicios profesionales (13 perfiles, 4 meses)</td><td class="num">356,000</td></tr>
-            <tr><td>3 nodos de cómputo homogéneos</td><td class="num">240,000</td></tr>
-            <tr><td>NAS de respaldo con snapshots inmutables</td><td class="num">35,000</td></tr>
-            <tr><td>2 switches de 10/25 GbE</td><td class="num">24,000</td></tr>
-            <tr><td>13 equipos de desarrollo</td><td class="num">71,500</td></tr>
-            <tr><td>13 monitores IPS de 27"</td><td class="num">15,600</td></tr>
-            <tr><td>1 impresora multifuncional</td><td class="num">3,500</td></tr>
-            <tr><td>2 SSD externos cifrados</td><td class="num">1,600</td></tr>
-          </tbody>
-          <tfoot><tr><td>Total (techo del plan: 747,800)</td><td class="num">747,200</td></tr></tfoot>
-        </table>
-      </div>
+    <h2 id="h-eq">Equipo: los perfiles del plan con responsabilidades claras</h2>
+    <p class="prose">Se mantienen los 13 perfiles y los equipos del plan. Para cubrir los roles que el plan no tenía (arquitectura, plataforma, seguridad y datos) sin cambiar contratos, cada perfil asume responsabilidades concretas. La OTI suma al menos dos servidores de planta para asegurar la continuidad.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Perfil del plan</th><th>Responsabilidad en SIGEUN 2.0</th></tr></thead>
+        <tbody>
+          <tr><td>Coordinador / Jefe de proyecto</td><td>Jefe de proyecto y Scrum Master; enlace con los dueños de proceso</td></tr>
+          <tr><td>Programador senior 1</td><td>Arquitecto y líder técnico: ADRs, contratos, revisión final</td></tr>
+          <tr><td>Programador senior 2</td><td>Plataforma y seguridad: Proxmox, Kubernetes, CI/CD, respaldos, Keycloak</td></tr>
+          <tr><td>Programador senior 3</td><td>Servicios transversales y dueño del modelo de datos</td></tr>
+          <tr><td>Programador senior 4</td><td>Trámite y documentos (Mesa de Partes Virtual)</td></tr>
+          <tr><td>Programadores junior (4)</td><td>Frontend y fullstack en pareja con un senior</td></tr>
+          <tr><td>Analista funcional</td><td>Event Storming, historias, BDD y UAT</td></tr>
+          <tr><td>Diseñador UX/UI/BD</td><td>UX/UI y sistema de diseño; apoyo al modelo de datos</td></tr>
+          <tr><td>Testeador (QA)</td><td>Automatización E2E y pruebas de carga</td></tr>
+          <tr><td>Documentador</td><td>Docs-as-code: manuales, runbooks, ADRs</td></tr>
+        </tbody>
+      </table>
     </div>
-    <p class="hint">Si los servicios empiezan en noviembre de 2026, los cuatro meses llegan a febrero de 2027 y requieren previsión presupuestal 2027. Mover montos entre específicas de gasto requiere modificación presupuestaria.</p>
+    <p class="hint">Necesidades para el presupuesto 2027: discos para las bahías libres del servidor 1, tarjeta de 10 GbE, redundancia de disco en el servidor 2 y un tercer nodo cuando se busque alta disponibilidad.</p>
   </section>
 
   <section class="narrow stack" aria-labelledby="h-docs">
@@ -326,7 +307,8 @@ tfoot td { font-weight: 600; background: var(--panel); }
       <a href="https://github.com/Mermas-CC/sigeun2.0/blob/claude/microservices-architecture-plan-cufm1i/docs/01-analisis-critico-del-plan.md"><b>1. Análisis crítico</b><span>34 hallazgos con evidencia, 10 inconsistencias y brechas de ingeniería.</span></a>
       <a href="https://github.com/Mermas-CC/sigeun2.0/blob/claude/microservices-architecture-plan-cufm1i/docs/02-propuesta-tecnica-mejorada.md"><b>2. Propuesta técnica</b><span>Metodología 12207, requisitos no funcionales, pruebas, seguridad, equipo, riesgos e indicadores.</span></a>
       <a href="https://github.com/Mermas-CC/sigeun2.0/blob/claude/microservices-architecture-plan-cufm1i/docs/03-arquitectura-microservicios.md"><b>3. Arquitectura</b><span>Catálogo de servicios, eventos, datos, seguridad, CI/CD, despliegue y stack.</span></a>
-      <a href="https://github.com/Mermas-CC/sigeun2.0/tree/claude/microservices-architecture-plan-cufm1i/docs/adr"><b>Decisiones (ADR)</b><span>Nueve decisiones de arquitectura con alternativas y consecuencias.</span></a>
+      <a href="https://github.com/Mermas-CC/sigeun2.0/blob/claude/microservices-architecture-plan-cufm1i/docs/04-guia-de-estudio.md"><b>4. Guía de estudio</b><span>Qué aprender y en qué orden, uso de los equipos del plan y cómo trabajar con Claude Code.</span></a>
+      <a href="https://github.com/Mermas-CC/sigeun2.0/tree/claude/microservices-architecture-plan-cufm1i/docs/adr"><b>Decisiones (ADR)</b><span>Diez decisiones de arquitectura con alternativas y consecuencias.</span></a>
     </div>
   </section>
 </main>
